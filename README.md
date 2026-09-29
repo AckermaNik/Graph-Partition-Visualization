@@ -76,6 +76,30 @@ Displays:
 - Top 10 influential nodes per cluster (Top 10 nodes with highest ,      global, incoming degree - authorities)
 - Cross and intra-partition relationships  
 
+### ⚡ Asynchronous Cache Warm-up
+
+The connection-startup cache flow is intentionally asynchronous so the first
+screen is not blocked by the full graph workload:
+
+- `/caches` returns the initial 12-node demo graph immediately.
+- The schema cache and full partition/cluster graph cache warm in background
+  `asyncio` tasks.
+- If the frontend requests either resource while its warm-up task is still
+  running, it waits for that same in-flight task instead of starting a
+  duplicate database query.
+- Cluster statistics are **not** warmed during connection startup. They are
+  requested after the cluster graph is visualized, when the user clicks
+  **"Show all clusters"**, and are then stored in `CLUSTERS_STATS_CACHE`.
+- The statistics are associated with the panel that requested them, so an old
+  open panel can continue displaying its own database version.
+- A database refresh clears the schema, cluster graph, cluster statistics, and
+  partition-ID caches. It also cancels any schema or partition warm-up tasks
+  that are still pending. Results that completed before the refresh are
+  allowed to remain as already-returned results.
+
+The backend keeps separate task registries for schema and partition warm-ups
+and removes each task when it completes, fails, or is cancelled.
+
 ---
 
 ### 📊 Cluster Metrics

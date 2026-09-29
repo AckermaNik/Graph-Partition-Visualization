@@ -66,8 +66,9 @@ DEMO_NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
 
 # conn_id -> (driver, last_used)
 DRIVER_CACHE: Dict[str, Tuple[AsyncDriver, float]] = {}
-# conn_id -> background partition warm-up task
+# conn_id -> background cache warm-up tasks
 PARTITION_WARMUP_TASKS: dict[str, asyncio.Task] = {}
+SCHEMA_WARMUP_TASKS: dict[str, asyncio.Task] = {}
 CACHE_TTL_S = 60 * 60 * 8  # 8 hours idle timeout
 
 @app.get("/")
@@ -143,11 +144,20 @@ def cache_key(con_id: str) -> str:
     return hashlib.sha256(con_id.encode("utf-8")).hexdigest()
 
 
+def _cancel_warmup_tasks(conn_id: str) -> None:
+    """Cancel warm-ups that have not completed for this connection."""
+    for task_map in (
+        PARTITION_WARMUP_TASKS,
+        SCHEMA_WARMUP_TASKS,
+    ):
+        task = task_map.pop(conn_id, None)
+        if task and not task.done():
+            task.cancel()
+
+
 def invalidate_connection_caches(conn_id: str) -> None:
     """Remove database-derived caches so the next request reads fresh data."""
-    warmup_task = PARTITION_WARMUP_TASKS.pop(conn_id, None)
-    if warmup_task and not warmup_task.done():
-        warmup_task.cancel()
+    _cancel_warmup_tasks(conn_id)
 
     key = cache_key(conn_id)
     
@@ -164,9 +174,7 @@ def _evict_expired():
         drv, last = DRIVER_CACHE.pop(cid)
         COLORS_CACHE.pop(cid, None)
         PARTITION_IDS_CACHE.pop(cid, None)
-        warmup_task = PARTITION_WARMUP_TASKS.pop(cid, None)
-        if warmup_task and not warmup_task.done():
-            warmup_task.cancel()
+        _cancel_warmup_tasks(cid)
         print(f"DEBUG: Connection {cid} is {now - last:.2f} seconds old (TTL: {CACHE_TTL_S})")
         asyncio.create_task(_close_driver(drv))
 
@@ -190,12 +198,33 @@ async def _warm_partitions(conn_id: str) -> None:
             PARTITION_WARMUP_TASKS.pop(conn_id, None)
 
 
+async def _warm_schema(conn_id: str) -> None:
+    try:
+        await _get_schema_data(conn_id, False)
+    except asyncio.CancelledError:
+        raise
+    except Exception as exc:
+        print(f"[SCHEMA_WARMUP] Failed for {conn_id}: {type(exc).__name__}: {exc}")
+    finally:
+        current_task = asyncio.current_task()
+        if SCHEMA_WARMUP_TASKS.get(conn_id) is current_task:
+            SCHEMA_WARMUP_TASKS.pop(conn_id, None)
+
+
 def _schedule_partition_warmup(conn_id: str) -> None:
     current_task = PARTITION_WARMUP_TASKS.get(conn_id)
     if current_task and not current_task.done():
         return
 
     PARTITION_WARMUP_TASKS[conn_id] = asyncio.create_task(_warm_partitions(conn_id))
+
+
+def _schedule_schema_warmup(conn_id: str) -> None:
+    current_task = SCHEMA_WARMUP_TASKS.get(conn_id)
+    if current_task and not current_task.done():
+        return
+
+    SCHEMA_WARMUP_TASKS[conn_id] = asyncio.create_task(_warm_schema(conn_id))
 
 
 @app.post("/validate")
@@ -380,12 +409,12 @@ async def init_caches(conn_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
-    # Keep connection startup focused on the data needed for the first screen.
-    # Schema and partition statistics are loaded lazily by the corresponding UI
-    # actions.  The partition graph itself is still warmed here because the
-    # "Show all clusters" action needs it immediately.
+    # Return the initial graph immediately while schema and partition data warm
+    # in the background. Statistics are intentionally loaded only after the
+    # user clicks "Show Clusters".
     if not noPid:
         _schedule_partition_warmup(conn_id)
+    _schedule_schema_warmup(conn_id)
 
     return {"records": shaped, "noPid": noPid}
 
@@ -453,6 +482,17 @@ async def _get_schema_data(conn_id: str, refresh: bool):
 
     try:
         key = cache_key(conn_id)
+
+        if not refresh:
+            warmup_task = SCHEMA_WARMUP_TASKS.get(conn_id)
+            current_task = asyncio.current_task()
+            if warmup_task and warmup_task is not current_task and not warmup_task.done():
+                try:
+                    await warmup_task
+                except asyncio.CancelledError:
+                    pass
+                except Exception:
+                    pass
 
         if (not refresh) and key in SCHEMA_CACHE:
             print("[SCHEMA] Served from cache")
@@ -939,6 +979,11 @@ async def refresh_cache(payload: SchemaRequest):
     if not entry:
         raise HTTPException(status_code=401, detail="Invalid or expired conn_id. Call /validate again.")
 
+    # Cancel only refresh-sensitive work that is still pending.  A completed
+    # task is not cancelled; any cache invalidation happens independently.
+    if payload.refresh:
+        invalidate_connection_caches(payload.conn_id)
+
     drv, _ = entry
     DRIVER_CACHE[payload.conn_id] = (drv, time.time())
 
@@ -950,8 +995,6 @@ async def refresh_cache(payload: SchemaRequest):
             COLORS_CACHE[payload.conn_id] = build_label_color_map(node_labels, min_hue_gap=  (360 / 6) - 15)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
-
-    invalidate_connection_caches(payload.conn_id)
 
     return {"ok": True, "label_count": len(node_labels)}
 
