@@ -1,0 +1,47 @@
+@use 'sass:color';
+
+.bg-light[colspan] {
+  @include media-breakpoint-up(sm) {
+    padding-left: 40px;
+  }
+
+  @include media-breakpoint-up(md) {
+    padding-left: 48px;
+  }
+
+  @include media-breakpoint-up(lg) {
+    padding-left: 96px;
+  }
+}
+
+.table thead th::after {
+  position: absolute;
+  content: '';
+  background-color: rgb(240, 240, 240);
+  width: 1px;
+  height: calc(100% - 30px);
+  right: 0px;
+  top: 16px;
+  height: 0;
+}
+
+.simplebar-track.simplebar-vertical {
+  width: 10px;
+}
+
+.simplebar-scrollbar:before {
+  opacity: 0.6; /* more visible */
+}
+
+/*SOS DO NOT CHANGE IT*/
+/* Force react-sigma's internal container to actually take space */
+.sigma-container {
+  height: 100% !important;
+  width: 100% !important;
+  min-height: 0 !important;
+}
+
+:root {
+  --bs-body-bg: rgb(255, 255, 255) !important; 
+  --panel-color:#edf1f5!important;
+}

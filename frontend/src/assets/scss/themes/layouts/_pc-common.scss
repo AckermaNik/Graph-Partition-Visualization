@@ -1,0 +1,87 @@
+// ============================
+//   6. Common layout css start
+// ============================
+
+.pc-container {
+  $temp: $header-height + 66;
+  top: $header-height;
+  position: relative;
+  margin-left: $sidebar-width;
+  min-height: calc(100vh - #{$temp});
+
+
+  .pc-content {
+    @include media-breakpoint-down(xl) {
+      &.container {
+        max-width: 100%;
+      }
+    }
+  }
+
+  .card{
+      padding-left: 20px;
+      padding-right: 20px;
+      padding-top: 20px;
+      background-color: #ffffff;
+      border-radius: $border-radius+10px;
+    }
+}
+
+@media (max-width: 1024px) {
+  .pc-container {
+    margin-left: 0px;
+    margin-right: 0px;
+
+    .pc-content {
+      padding-top: 20px;
+      padding-left: 15px;
+      padding-right: 15px;
+    }
+  }
+
+}
+
+@include media-breakpoint-down(sm) {
+  .col-form-label {
+    padding-top: 0;
+    padding-bottom: 5px;
+  }
+
+  .pc-container {
+    border-radius: 20px;
+    .pc-content {
+      padding: 15px;
+    }
+
+    .container {
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+  }
+}
+
+
+.btn-blue-gradient {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 18px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  border-radius: 10px;
+  border: none;
+  background: var(--pc-buttons-color);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(21, 101, 192, 0.35);
+  transition: all 0.2s;
+
+  &:hover {
+    box-shadow: 0 6px 24px rgba(21, 101, 192, 0.5);
+  }
+}
+// ============================
+//   6. Common layout css end
+// ============================

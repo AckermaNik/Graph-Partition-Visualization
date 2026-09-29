@@ -1,0 +1,52 @@
+---------For web page start up-----------
+
+To run the web page that uses vite:
+    in /app dir: npm start
+
+
+---------For python FastAPI server start up-----------
+
+Windows: 
+    in /app dir: .venv\Scripts\activate
+    pip install -r requirements.txt
+    and then: python -u -m uvicorn backend.main:app                #--reload
+
+Debian:
+    in /app dir: source .venvlinux/bin/activate 
+    pip install -r requirements.txt
+    and then: python -u -m uvicorn backend.main:app                #--reload
+
+
+---------For redis server start up (for the saved queries)-----------
+Debian:
+    (if not installed) sudo apt install redis-server
+    redis-server
+
+
+---------For data base in Browser-----------
+
+neo4j+s://d2662df7.databases.neo4j.io
+neo4j
+gjvtrZ75IlhLt0pGZFf3jqXwmOnjxjMFQj7SLwtOfuc
+
+Windows:
+    cd /d C:\Users\30697\neo4j-community-5.26.2-windows\neo4j-community-5.26.2-main
+    cd /d C:\Users\30697\neo4j-community-5.26.2-windows\neo4j-test
+    bin\neo4j.bat console
+
+
+Azure:
+scp -r app azureuser@20.240.184.130:~/
+ssh azureuser@20.240.184.130
+http://20.240.184.130:3000
+
+
+for Neo4j DB: ssh azureuser@4.223.67.60
+bolt://4.223.67.60:7687
+
+sudo docker run -d \
+   --name thesis-neo4j \
+   --network host \
+   -v ~/existing_neo4j_data:/data \
+   --env NEO4J_AUTH=neo4j/N1kTh@greek \
+   neo4j:5.26.2

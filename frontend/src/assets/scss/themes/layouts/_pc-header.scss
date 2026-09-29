@@ -1,0 +1,306 @@
+// ============================
+//   4. Header CSS Start
+// ============================
+
+.pc-header {
+  --pc-header-color: #fff;
+  background: var(--pc-sidebar-background);
+  color: white;
+  min-height: $header-height;
+  height: auto;        /* Let it shrink to fit the search bar */
+  box-shadow: var(--pc-header-shadow);
+  backdrop-filter: blur(7px);
+  position: fixed;
+  display: flex;
+  left: $sidebar-width;
+  right: 0;
+  z-index: 1025;
+  padding-left: 1rem;
+
+  // Unordered lists in header
+  ul {
+    margin-bottom: 0;
+    display: inline-flex;
+  }
+
+  // Mobile header specific
+  .m-header {
+    height: $header-height;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: $sidebar-width;
+    padding: 16px 10px 16px 24px;
+  }
+
+  // Main header wrapper
+  .header-wrapper {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    align-items: center;
+
+    @include media-breakpoint-down(sm) {
+      padding: 0 15px;
+    }
+  }
+
+  // ----------------------------------------
+  // Header Items & Navigation Links
+  // ----------------------------------------
+  .pc-h-item {
+    height: 64px; /* Force a standard clickable height */
+    display: flex;
+    align-items: center;
+    position: static;
+    z-index: 12;
+
+    .pc-h-dropdown {
+      @include media-breakpoint-down(sm) {
+        left: 15px !important;
+        right: 15px !important;
+      }
+    }
+  }
+
+  .pc-head-link {
+    margin: 0 1rem 0 0;
+    position: relative;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: $border-radius;
+    color: var(--pc-header-color);
+    overflow: visible !important; /* Allow the icon to be seen even if container is small */
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 1;
+      background: var(--pc-active-background);
+      border-radius: 50%;
+      transform: scale(0);
+      transition: all 0.08s cubic-bezier(0.37, 0.24, 0.53, 0.99);
+    }
+
+    > svg, > i {
+      font-size: 24px;
+      position: relative;
+      z-index: 5;
+      color: var(--pc-header-color);
+      transition: all 0.08s cubic-bezier(0.37, 0.24, 0.53, 0.99);
+    }
+
+    > svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    &.active, &:active, &:hover {
+      text-decoration: none;
+      color: var(--bs-primary);
+
+      > svg, > i {
+        color: var(--pc-sidebar-background);
+      }
+
+      &::before {
+        border-radius: 0;
+        transform: scale(1);
+      }
+    }
+
+    @include media-breakpoint-down(sm) {
+      padding: 0.65rem;
+      margin: 0 5px;
+    }
+  }
+
+  // ----------------------------------------
+  // Search & Query Bar Section
+  // ----------------------------------------
+  .pc-header-search-fill {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    position: relative; // Required to anchor the progress bar
+
+    form {
+      display: flex;
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+  }
+
+  .pc-header-search-group {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+  }
+
+  .search-container-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 90%;
+
+    .pc-header-search-input {
+      flex: 1 1 auto;
+      min-width: 0;
+      height: 4rem; /* Fixed height logic we applied earlier */
+      border-radius: 8px;
+      border-color: var(--pc-sidebar-background);
+      line-height: 1.5; 
+      padding-top: 1.3rem !important;
+      resize: none; // Keep this to hide the drag handle
+      margin-bottom: 1rem;
+      padding-right: 60px !important; // Room for the "Press Enter" text
+      font-family: 'Space Mono', monospace;
+      
+      /* Scrolling rules */
+      overflow-y: auto; 
+      scrollbar-width: none; 
+      -ms-overflow-style: none; 
+      resize: none;
+
+      // &::-webkit-search-cancel-button {
+      //   display: none;
+      // }
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+
+    .pc-search-play {
+      position: absolute;
+      right: 0;
+      top: 0.05rem;
+      bottom: 1.05rem; 
+      width: 50px; 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: var(--pc-buttons-color);
+      border-radius: 0 5px 5px 0; 
+      cursor: pointer;
+      z-index: 1;
+
+      &:disabled {
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  .query-progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 8px;
+    background-color: #f0e6f5; 
+    overflow: hidden;
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 30%;
+      background-color: #bf1b1b; 
+      animation: loading-slide 1.5s infinite ease-in-out;
+    }
+  }
+
+  // ----------------------------------------
+  // Right-Side Utilities & Buttons
+  // ----------------------------------------
+  
+  // Scoping this fixes potential bugs where you accidentally 
+  // overwrite Bootstrap's global .ms-auto class in other components.
+  .ms-auto {
+    flex: 0 0 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+
+  .save-query-btn {
+    background: none;
+    border: none;
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.35;
+    }
+
+    &:not(:disabled) {
+      cursor: pointer;
+    }
+
+    &__icon {
+      color: white;
+      transition: transform 0.15s ease;
+
+      &--active {
+        color: var(--pc-buttons-color);
+        transform: scale(1.25);
+      }
+    }
+  }
+
+  // ----------------------------------------
+  // Responsive / Mobile Behaviors
+  // ----------------------------------------
+  @media (max-width: 1024px) {
+    top: 0;
+    left: 0;
+    transition: all 0.15s ease-in-out;
+
+    .m-header {
+      display: none;
+    }
+
+    .pc-mob-drp {
+      &.mob-drp-active {
+        .pc-h-item {
+          display: block;
+          min-height: auto;
+          position: relative;
+
+          .pc-head-link {
+            display: block;
+            margin: 5px 10px !important;
+          }
+
+          .dropdown-menu {
+            position: relative !important;
+            width: 100%;
+            float: none;
+            box-shadow: none;
+          }
+        }
+
+        ul {
+          display: block;
+        }
+      }
+    }
+  }
+} // <-- End of .pc-header block
+
+// Keyframes must always stay at the top/root level of the document, 
+// so they stay out of the nested hierarchy.
+@keyframes loading-slide {
+  0% { left: -30%; }
+  100% { left: 100%; }
+}
+
+// ============================
+//   4. Header CSS End
+// ============================

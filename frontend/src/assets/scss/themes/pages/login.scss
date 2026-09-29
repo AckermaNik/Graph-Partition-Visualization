@@ -1,0 +1,152 @@
+// ================================
+//   9. Login page layout css
+// ================================
+
+.pc-container {
+
+   .db-conn-input {
+   
+    border-radius: 14px;           // rounder corners
+    border-width: 1px;           // thicker border
+    border: 1.5px solid #a7adb5;
+    padding: 8px 12px;             // nicer spacing
+  }
+
+  .db-eye{
+    border-radius: 14px;           // rounder corners
+    border-width: 2.5px;           // thicker border
+    border-color:var(--pc-sidebar-background);         // blue outline
+    background-color: var(--pc-sidebar-background);
+  }
+
+  .db-conn-input:focus {
+    border: 1.5px solid #989da4; 
+    box-shadow: 0 0 0 0.15rem rgba(30, 136, 255, 0.25);
+    }
+}
+
+.upload-dropzone {
+  flex:1;
+  border: 1.5px solid #989da4; 
+  background: #faf8f8;
+  border-radius: 20px;
+  min-height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  cursor: pointer;
+  width: 95%;
+}
+
+.upload-dropzone.is-dragging {
+  background: #eef6ff;
+  border-color: var(--pc-sidebar-background); ;
+}
+
+.upload-dropzone-inner {
+  width: 100%;
+  max-width: 720px;
+  text-align: center;
+}
+
+.upload-title {
+  font-size: 25px;
+  font-weight: 300;
+  color: #6b6b6b;
+  margin-bottom: 14px;
+}
+
+.upload-subtitle {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 18px 0;
+}
+
+.upload-btn {
+  border-radius: 14px;
+  padding: 12px 18px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+}
+
+.upload-hint {
+  margin-top: 26px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #7a7a7a;
+}
+
+.importer-container {
+  background: #f8f9fa;
+  padding: 30px;
+  border-radius: 12px;
+}
+
+.main-title {
+  font-weight: 400;
+  color: #333;
+  letter-spacing: 1px;
+}
+
+.step-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.login-page-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+  background: #f0f2f5;
+  padding-bottom: 4rem;
+}
+
+.login-section {
+  &__title {
+    font-size: 1.35rem;
+    font-weight: 650;
+    color: #2d2d2d;
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-right: 1rem;
+    gap: 10px;
+
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 1.2em;
+      border-radius: 4px;
+      background: linear-gradient(180deg, #0d6efd, #6ea8fe);
+    }
+  }
+
+  &__subtitle {
+    font-size: 0.82rem;
+    color: #adb5bd;
+    font-family: monospace;
+    margin: 0;
+    letter-spacing: 0.02em;
+  }
+
+  &__card {
+    width: 560px;
+    max-height:800px;
+    max-height: 1000px;
+    border: 1.5px solid #a7adb5;
+    border-radius: 12px;
+    padding: 24px 28px ;
+    padding-bottom: 40px;
+    box-shadow: 0 0 80px rgba(44, 16, 61, 0.25);
+  }
+
+}

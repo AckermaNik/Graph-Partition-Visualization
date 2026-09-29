@@ -1,0 +1,218 @@
+// ============================
+//    3. Sidebar css start
+// ============================
+.b-brand {
+  display: flex;
+  align-items: center;
+
+  .b-bg {
+    border-radius: 10px;
+    width: 35px;
+    height: 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+      stroke: #fff;
+    }
+
+    i {
+      color: #fff;
+    }
+  }
+}
+
+.navbar-content {
+  position: relative;
+}
+
+.pc-sidebar {
+  background: var(--pc-sidebar-background);
+  width: $sidebar-width;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  z-index: 1026;
+  overflow: hidden;
+  box-shadow: var(--pc-sidebar-shadow);
+  border-right: var(--pc-sidebar-border);
+
+  .navbar-wrapper {
+    width: $sidebar-width;
+    background: inherit;
+  }
+
+  ul {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+  }
+
+  .pc-item.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+  .pc-item .pc-micon i {
+    font-size: 40px;
+    
+  }
+
+  .pc-micon {
+    margin-right: 15px;
+    height: 2px;
+    width: 24px;
+    display: inline-block;
+    vertical-align: middle;
+    text-align: center;
+  }
+
+  .pc-link {
+    display: block;
+    padding: 30px 20px 20px 20px;
+    color: var(--pc-sidebar-color);
+    position: relative;
+
+
+    font: {
+      size: 14px;
+      weight: 400;
+    }
+
+    &:focus,
+    &.active,
+    &:hover {
+      text-decoration: none;
+    }
+  }
+
+  .m-header {
+    height: $header-height;
+    display: flex;
+    align-items: center;
+    padding: 10px 0px 0px 4px;
+    background: var(--pc-logo-bg);
+
+    .logo-sm {
+      display: none;
+    }
+
+    .logo.logo-lg {
+      height: 72px;   // adjust this
+      width: auto;
+    }
+  }
+
+  .navbar-content {
+    position: relative;
+    height: calc(100vh - #{$header-height});
+    padding: 0 0;
+  }
+
+  .pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid rgba(0,0,0,0.12);
+}
+
+.pill--node {
+  background: rgba(0, 170, 255, 0.10);
+}
+
+.pill--rel {
+  background: rgba(255, 0, 170, 0.10);
+}
+
+}
+
+.pc-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+  backdrop-filter: blur(3px);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+@media (min-width: 1025px) {
+  .pc-sidebar {
+    transition: width 0.2s ease;
+
+    ~.pc-header {
+      transition: left 0.2s ease;
+    }
+
+    ~.pc-footer,
+    ~.pc-container {
+      transition: margin-left 0.2s ease;
+    }
+
+    &.pc-sidebar-hide {
+      width: 0;
+      --pc-sidebar-border: none;
+
+      ~.pc-header {
+        left: 0;
+      }
+
+      ~.pc-footer,
+      ~.pc-container {
+        margin-left: 0px;
+      }
+    }
+  }
+
+  .pc-header .pc-h-item.pc-sidebar-popup {
+    display: none;
+  }
+}
+
+@media (max-width: 1024px) {
+  .pc-header .pc-h-item.pc-sidebar-collapse {
+    display: none;
+  }
+
+  .pc-sidebar {
+    left: -#{$sidebar-width};
+    box-shadow: none;
+    top: 0;
+    transition: all 0.2s ease-in-out;
+
+    &.mob-sidebar-active {
+      left: 0;
+
+      .navbar-wrapper {
+        position: relative;
+        z-index: 5;
+        background: inherit;
+      }
+    }
+  }
+}
+
+
+@keyframes info-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+// ============================
+//    3. Sidebar css end
+// ============================

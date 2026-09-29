@@ -1,0 +1,6 @@
+.venv
+.venvlinux
+__pycache__
+*.pyc
+*.pyo
+.env

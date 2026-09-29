@@ -1,0 +1,138 @@
+.wc-root {
+    padding: 0 24px 32px;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 90%;
+}
+
+/* ── hero ── */
+.wc-hero {
+  text-align: center;
+  padding-top: 1rem;
+}
+.wc-hero h1 {
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 5px;
+}
+.wc-hero p {
+  font-size: 0.82rem;
+  opacity: 0.5;
+  margin: 0 0 12px;
+}
+.wc-login-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 18px;
+  border-radius: 7px;
+  border: 1px solid hsla(217, 91%, 60%, 0.45);
+  background: rgba(59, 130, 246, 0.09);
+  color: #60a5fa;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.wc-login-link:hover {
+  background: rgba(59, 130, 246, 0.18);
+  border-color: rgba(59, 130, 246, 0.7);
+  color: #93c5fd;
+  text-decoration: none;
+}
+.wc-login-link svg {
+  opacity: 0.75;
+}
+
+/* ── cards row ── */
+.wc-row {
+  display: flex;
+  gap: 14px;
+  align-items: stretch;
+}
+
+.wc-card {
+  flex: 1;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-color: color-mix(in srgb, var(--accent) 38%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent) 15%, transparent),
+    0 6px 22px rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  min-height: 15.5rem;
+}
+.wc-card:hover {
+  transform: translateY(-7px);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent),
+    0 12px 32px rgba(0, 0, 0, 0.3);
+}
+
+.wc-card-bar {
+  height: 2px;
+  background: var(--accent);
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+.wc-card-inner {
+  padding: 0px 15px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+}
+
+.wc-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.wc-icon {
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.wc-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.wc-bullets {
+  list-style: none;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  top:2rem;
+  padding-left: 0rem;
+  align-items: center;
+
+}
+.wc-bullets li {
+  font-size: 0.76rem;
+  opacity: 0.62;
+  line-height: 1.35;
+  padding-left: 1rem;
+  padding-right: 0.5rem;
+  position: relative;
+  white-space: pre-line;
+}
+
+.wc-bullets li::before {
+  content: '·';
+  position: absolute;
+  left: 1px;
+  opacity: 0.55;
+}
