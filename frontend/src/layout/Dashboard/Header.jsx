@@ -11,7 +11,7 @@ import { handlerDrawerOpen, useGetMenuMaster } from '@/api/menu';
 import { useAppState } from '@/context/useAppState';
 import { isConnectionRecoveryError, runCypher } from '@/api/neo4j';
 import { useConnectionID } from '@/api/connection';
-import { saveSessionSavedQuery } from '@/api/sessionSavedQueries';
+import { saveSessionSavedQuery } from '@/api/savedQueries';
 
 // =============================|| MAIN LAYOUT - HEADER ||============================== //
 
@@ -190,7 +190,7 @@ export default function Header() {
                   <Form.Control
                     as="textarea"
                     id="query-bar"
-                    placeholder="$ Neo4j 5.x Cypher:  (e.g MATCH (a)-[r]-(b) WHERE labels(a) <> labels(b) RETURN a, r, b LIMIT 12)"
+                    placeholder="$ Neo4j 5.x Cypher:  (e.g MATCH (a)-[r]-(b) WHERE elementId(a) < elementId(b) AND labels(a) <> labels(b) RETURN a, r, b LIMIT 12)"
                     value={query}
                     onKeyDown={handleKeyDown}
                     className="pc-header-search-input w-100"

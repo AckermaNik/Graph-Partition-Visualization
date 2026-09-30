@@ -52,6 +52,7 @@
   .pc-item.disabled {
     opacity: 0.4;
     pointer-events: none;
+    cursor: not-allowed;
   }
   .pc-item .pc-micon i {
     font-size: 40px;

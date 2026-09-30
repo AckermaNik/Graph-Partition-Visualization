@@ -1,7 +1,7 @@
 import { useLocation, Link } from 'react-router-dom';
 import { handlerDrawerOpen } from '@/api/menu.js';
 
-export default function NavItem({ item, onClick, children, liRef, liClassName = '' }) {
+export default function NavItem({ item, onClick, children, liRef, liClassName = '', disabled = false }) {
   const { pathname } = useLocation();
   const isVis = pathname === '/visualization';
   const isLoading = pathname === '/loading';
@@ -9,6 +9,12 @@ export default function NavItem({ item, onClick, children, liRef, liClassName = 
   const isMobile = window.innerWidth <= 1024;
 
   const handleClick = (e) => {
+    if (disabled) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+
     if (isMobile) handlerDrawerOpen(false);
 
     // allow parent to override behavior
@@ -30,8 +36,8 @@ export default function NavItem({ item, onClick, children, liRef, liClassName = 
   return (
     <>
       {(isVis || (isLoading && item.id === 'new-pr') || !item.hidden) && (
-        <li ref={liRef} id={item.id} className={`pc-item ${isSelected ? 'active' : ''} ${liClassName}`}>
-          <Link className="pc-link" to={item.url} onClick={handleClick} title={item.label}>
+        <li ref={liRef} id={item.id} className={`pc-item ${isSelected ? 'active' : ''} ${disabled ? 'disabled' : ''} ${liClassName}`}>
+          <Link className="pc-link" to={item.url} onClick={handleClick} title={item.label} aria-disabled={disabled}>
             <span className="pc-micon">
               <i className={item.icon} />
             </span>

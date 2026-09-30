@@ -22,8 +22,7 @@ export default function InspectorDrawer({ inspector, setInspector, onRequestDbRe
 
   const connectionID = useConnectionID();
 
-  const [clusterStats, setClusterStats] = useState(null);
-  const [refreshClStats, setRefreshClStats] = useState(false);
+  const clusterStats = Array.isArray(prefetchedPartitionStats) ? prefetchedPartitionStats : null;
 
   const [queryNodeCount, setQueryNodeCount] = useState(0);
   const [queryEdgeCount, setQueryEdgeCount] = useState(0);
@@ -44,6 +43,7 @@ export default function InspectorDrawer({ inspector, setInspector, onRequestDbRe
   const [dbError, setDbError] = useState(null);
 
   const [showTick, setShowTick] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [refreshDB, setRefreshDB] = useState(false);
   const [showDataInfo, setshowDataInfo] = useState(false);
 
@@ -56,14 +56,28 @@ export default function InspectorDrawer({ inspector, setInspector, onRequestDbRe
   }, [showNodeData, showDataInfo, showClusterData, showQueryData]);
 
   const loadDbInfo = useCallback(
-    async ({ refresh }) => {
+    async ({ refresh = false }) => {
+      if (!refresh && dbData) {
+        setDbStatus('success');
+        return dbData;
+      }
+
       setDbStatus('loading');
       setDbError(null);
       try {
         const data = await fetchDataBaseInfos({ conn_id: connectionID, refresh });
         setDbStatus('success');
-        setDbData(data);
-        sessionStorage.setItem('db_metadata_cache', JSON.stringify(data));
+
+        const serializedData = JSON.stringify(data);
+        setDbData((previousData) => {
+          if (JSON.stringify(previousData) === serializedData) {
+            return previousData;
+          }
+
+          sessionStorage.setItem('db_metadata_cache', serializedData);
+          return data;
+        });
+
         return data;
       } catch (err) {
         if (isConnectionRecoveryError(err)) return;
@@ -72,7 +86,7 @@ export default function InspectorDrawer({ inspector, setInspector, onRequestDbRe
         throw err;
       }
     },
-    [connectionID]
+    [connectionID, dbData]
   );
 
   const handleToggleDb = async (e) => {
@@ -89,9 +103,10 @@ export default function InspectorDrawer({ inspector, setInspector, onRequestDbRe
     e.preventDefault();
     e.stopPropagation();
 
-    setRefreshDB(true);
-    setRefreshClStats(true);
+    if (isRefreshing) return;
 
+    setIsRefreshing(true);
+    setRefreshDB(true);
     // tell Visualization to refresh its DB-derived widgets
     onRequestDbRefresh?.();
     try {
@@ -99,6 +114,8 @@ export default function InspectorDrawer({ inspector, setInspector, onRequestDbRe
     } catch (err) {
       if (isConnectionRecoveryError(err)) return;
       console.log(err);
+    } finally {
+      setIsRefreshing(false);
     }
     setShowTick(true);
     const timer = setTimeout(() => setShowTick(false), 2000);
@@ -130,18 +147,10 @@ export default function InspectorDrawer({ inspector, setInspector, onRequestDbRe
       }
       setshowNodeData(false);
       setshowClusterData(true);
-      if (Array.isArray(prefetchedPartitionStats)) {
-        setClusterStats(prefetchedPartitionStats);
-      } else {
-        // Do not carry statistics over from a different panel while the
-        // current panel's statistics are still being prepared.
-        setClusterStats(null);
-      }
-      setRefreshClStats(false);
     };
 
     loadPartitionStats();
-  }, [activePanel?.id, connectionID, for_partitions, inspector.panelId, node, open, prefetchedPartitionStats, refreshClStats]);
+  }, [activePanel?.id, for_partitions, inspector.panelId, node, open]);
 
   /** Effect for Current graph Information - general query graph information */
   useEffect(() => {
@@ -363,13 +372,13 @@ export default function InspectorDrawer({ inspector, setInspector, onRequestDbRe
             {showTick ? (
               <span className="inspector__updated">&#10003; Updated</span>
             ) : (
-              <button className="btn-blue-gradient" onClick={handleOnRefresh}>
-                Refresh Database
+              <button className="btn-blue-gradient" onClick={handleOnRefresh} disabled={isRefreshing}>
+                {isRefreshing ? 'Refreshing…' : 'Refresh Database'}
               </button>
             )}
 
-            <button className="btn-blue-gradient" onClick={handleToggleDb}>
-              All graph
+            <button className="btn-blue-gradient" onClick={handleToggleDb} disabled={dbStatus === 'loading'}>
+              {dbStatus === 'loading' ? 'Loading…' : 'All graph'}
             </button>
           </div>
 

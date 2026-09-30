@@ -81,6 +81,10 @@
   &:hover {
     box-shadow: 0 6px 24px rgba(21, 101, 192, 0.5);
   }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
 }
 // ============================
 //   6. Common layout css end

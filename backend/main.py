@@ -359,7 +359,7 @@ async def init_caches(conn_id: str):
     pid = PARTITION_ID_CACHE[conn_id]
     
     query = """
-            MATCH (a)-[r]-(b) WHERE labels(a) <> labels(b)
+            MATCH (a)-[r]-(b) WHERE elementId(a) < elementId(b) AND labels(a) <> labels(b)
             WITH a, r, b, count{(a)<--()} AS deg_a, count{(b)<--()} AS deg_b
             RETURN a, r, b, deg_a, deg_b
             LIMIT 12
@@ -435,7 +435,7 @@ async def restart_exploration(conn_id: str):
 
     try:
         query = """
-            MATCH (a)-[r]-(b) WHERE labels(a) <> labels(b)
+            MATCH (a)-[r]-(b) WHERE elementId(a) < elementId(b) AND labels(a) <> labels(b)
             WITH a, r, b, count{(a)<--()} AS deg_a, count{(b)<--()} AS deg_b
             RETURN a, r, b, deg_a, deg_b
             LIMIT 12
@@ -527,7 +527,6 @@ async def export_schema_csv(payload: SchemaRequest):
 
     try:
         data = await _get_schema_data(payload.conn_id, payload.refresh)
-        data["colors"] = COLORS_CACHE.get(payload.conn_id, {})
 
         buf = io.StringIO()
         w = csv.writer(buf)

@@ -170,29 +170,5 @@ async def compute_schema(driver) -> dict:
                 "relTypeCounts": rel_type_counts,
             }
 
-            # -----------------------------
-            # 6) Union labels / types
-            # -----------------------------
-            edge_node_labels = {e["from"] for e in edges_list} | {e["to"] for e in edges_list}
-            all_node_labels = sorted(set(node_labels) | edge_node_labels | set(node_properties_sorted.keys()))
-
-            edge_rel_types = {e["type"] for e in edges_list}
-            all_rel_types = sorted(set(rel_types) | edge_rel_types)
-
-            for lbl in all_node_labels:
-                node_properties_sorted.setdefault(lbl, [])
-            for rt in all_rel_types:
-                rel_properties_sorted.setdefault(rt, [])
-
-            return {
-                "nodeLabels": all_node_labels,
-                "relationshipTypes": all_rel_types,
-                "nodeProperties": node_properties_sorted,
-                "relProperties": rel_properties_sorted,
-                "edges": edges_list,
-                "nodeCount": node_count,
-                "relationshipCount": rel_count,
-            }
-
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

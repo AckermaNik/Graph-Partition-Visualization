@@ -13,8 +13,8 @@ import { login_steps } from '@/tours/loginPageTour.jsx';
 import { fetchSchema, isConnectionRecoveryError } from '@/api/neo4j';
 import { useConnectionID } from '@/api/connection';
 import { useAppState } from '@/context/useAppState';
-import { restartExpl, databaseMetaData, fetchSavedQueries } from '@/api/neo4j';
-import { getSessionSavedQueries } from '@/api/sessionSavedQueries';
+import { restartExpl, databaseMetaData } from '@/api/neo4j';
+import { useSavedQueries } from '@/api/savedQueries';
 
 function SchemaOverlay({ status }) {
   if (status === 'idle') return null;
@@ -62,23 +62,26 @@ function SchemaOverlay({ status }) {
   );
 }
 
-function DatabaseMetaOverlay({ status, onClose }) {
+function DatabaseMetaOverlay({ status, onClose, onLoadingChange }) {
   const [meta, setMeta] = useState(null);
   const connectionID = useConnectionID();
 
   useEffect(() => {
     const fetchMeta = async () => {
+      onLoadingChange?.(true);
       try {
         const res = await databaseMetaData({ conn_id: connectionID });
         setMeta(res);
       } catch (err) {
         if (isConnectionRecoveryError(err)) return;
         alert('Please try again.' + err);
+      } finally {
+        onLoadingChange?.(false);
       }
     };
 
     if (status === true) fetchMeta();
-  }, [connectionID, status]);
+  }, [connectionID, onLoadingChange, status]);
 
   if (status === false || !meta) return null;
 
@@ -127,32 +130,20 @@ function DatabaseMetaOverlay({ status, onClose }) {
   );
 }
 
-function SavedQueriesOverlay({ status, onClose }) {
-  const [queries, setQueries] = useState([]);
-  const [isLoadingQueries, setIsLoadingQueries] = useState(false);
+function SavedQueriesOverlay({ status, onClose, onLoadingChange }) {
   const [copiedQueryId, setCopiedQueryId] = useState(null);
   const connectionID = useConnectionID();
+  const { queries, error, isLoading: isLoadingQueries } = useSavedQueries(connectionID, status);
+
   useEffect(() => {
-    const loadQueries = async () => {
-      setIsLoadingQueries(true);
-      const sessionQueries = getSessionSavedQueries();
+    onLoadingChange?.(isLoadingQueries);
+  }, [isLoadingQueries, onLoadingChange]);
 
-      try {
-        const res = connectionID ? await fetchSavedQueries({ conn_id: connectionID }) : { queries: [] };
-        const sharedQueries = res.queries ?? [];
-        const sessionQueryText = new Set(sessionQueries.map((query) => query.query));
-        setQueries([...sessionQueries, ...sharedQueries.filter((query) => !sessionQueryText.has(query.query))]);
-      } catch (err) {
-        if (isConnectionRecoveryError(err)) return;
-        setQueries(sessionQueries);
-        alert('Could not load saved queries. ' + err.message);
-      } finally {
-        setIsLoadingQueries(false);
-      }
-    };
-
-    if (status === true) loadQueries();
-  }, [connectionID, status]);
+  useEffect(() => {
+    if (error && !isConnectionRecoveryError(error)) {
+      alert('Could not load saved queries. ' + error.message);
+    }
+  }, [error]);
 
   const handleCopy = async (query) => {
     try {
@@ -226,6 +217,9 @@ export default function Navigation() {
   const connectionID = useConnectionID();
 
   const [schemaStatus, setSchemaStatus] = useState('idle');
+  const [isRestarting, setIsRestarting] = useState(false);
+  const [isLoadingMetadata, setIsLoadingMetadata] = useState(false);
+  const [isLoadingSavedQueries, setIsLoadingSavedQueries] = useState(false);
   const [showMeta, setShowMeta] = useState(false);
   const [showSavedQueries, setShowSavedQueries] = useState(false);
 
@@ -284,9 +278,10 @@ export default function Navigation() {
     e.preventDefault();
     e.stopPropagation();
 
+    setIsRestarting(true);
     removeAllPanels();
     try {
-      const graphpanelId = addPanel('MATCH (a)-[r]-(b) WHERE labels(a) <> labels(b) RETURN a, r, b LIMIT 12 ');
+      const graphpanelId = addPanel('MATCH (a)-[r]-(b) WHERE elementId(a) < elementId(b) AND labels(a) <> labels(b) RETURN a, r, b LIMIT 12 ');
       setActivePanelId(graphpanelId);
       const res = await restartExpl({ conn_id: connectionID });
       const records = res.records;
@@ -303,6 +298,8 @@ export default function Navigation() {
       if (isConnectionRecoveryError(err)) return;
       navigate('/');
       alert('Please try again.');
+    } finally {
+      setIsRestarting(false);
     }
   };
 
@@ -320,16 +317,20 @@ export default function Navigation() {
 
   return (
     <>
-      <DatabaseMetaOverlay status={showMeta} onClose={() => setShowMeta(false)} />
-      <SavedQueriesOverlay status={showSavedQueries} onClose={() => setShowSavedQueries(false)} />
+      <DatabaseMetaOverlay status={showMeta} onClose={() => setShowMeta(false)} onLoadingChange={setIsLoadingMetadata} />
+      <SavedQueriesOverlay
+        status={showSavedQueries}
+        onClose={() => setShowSavedQueries(false)}
+        onLoadingChange={setIsLoadingSavedQueries}
+      />
       <SchemaOverlay status={schemaStatus} />
 
       <ul className="pc-navbar">
         {menuItems.map((item) => {
-          if (item.id === 'schema') return <NavItem key={item.id} item={item} onClick={handleSchemaExport} />;
-          if (item.id === 'restart') return <NavItem key={item.id} item={item} onClick={handleReset} />;
-          if (item.id === 'db') return <NavItem key={item.id} item={item} onClick={handleDatabaseMetaData} />;
-          if (item.id === 'saved-queries') return <NavItem key={item.id} item={item} onClick={handleSavedQueries} />;
+          if (item.id === 'schema') return <NavItem key={item.id} item={item} onClick={handleSchemaExport} disabled={schemaStatus === 'loading'} />;
+          if (item.id === 'restart') return <NavItem key={item.id} item={item} onClick={handleReset} disabled={isRestarting} />;
+          if (item.id === 'db') return <NavItem key={item.id} item={item} onClick={handleDatabaseMetaData} disabled={isLoadingMetadata} />;
+          if (item.id === 'saved-queries') return <NavItem key={item.id} item={item} onClick={handleSavedQueries} disabled={isLoadingSavedQueries} />;
 
           if (item.id === 'new-pr') {
             return <NavItem id={item.id} key={item.id} item={item} />;

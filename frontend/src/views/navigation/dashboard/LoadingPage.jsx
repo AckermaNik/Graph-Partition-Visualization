@@ -35,7 +35,7 @@ export default function LoadingPage() {
         setConnectionID(activeConnectionID);
 
         removeAllPanels();
-        const graphpanelId = addPanel('MATCH (a)-[r]-(b) WHERE labels(a) <> labels(b) RETURN a, r, b LIMIT 12 ');
+        const graphpanelId = addPanel('MATCH (a)-[r]-(b) WHERE elementId(a) < elementId(b) AND labels(a) <> labels(b) RETURN a, r, b LIMIT 12 ');
         setActivePanelId(graphpanelId);
         const res = await initCaches({ conn_id: activeConnectionID });
         const records = res.records;

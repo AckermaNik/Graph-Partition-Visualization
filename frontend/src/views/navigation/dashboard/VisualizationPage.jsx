@@ -217,9 +217,11 @@ export default function Visualization() {
                     }}
                     /* open your right inspector panel when clicking a node */
                     onGraphNodeClick={(nodeBundle) => {
+                      setActivePanelId(panel.id);
                       setInspector((prev) => ({ ...prev, open: true, node: nodeBundle, panelId: panel.id }));
                     }}
                     onGraphStageClick={() => {
+                      setActivePanelId(panel.id);
                       setInspector((prev) => {
                         if (prev.panelId !== panel.id || !prev.node) return prev;
 
@@ -542,14 +544,16 @@ export default function Visualization() {
 
   useEffect(() => {
     setInspector((prev) => {
-      if (!prev.open || !prev.node || !prev.panelId || prev.panelId === activePanelId) return prev;
+      if (!prev.open || !prev.node || !prev.panelId) return prev;
+      if (panels.some((panel) => panel.id === prev.panelId)) return prev;
 
       return {
         ...prev,
-        node: null
+        node: null,
+        panelId: null
       };
     });
-  }, [activePanelId]);
+  }, [panels]);
 
   const activePanel = useMemo(() => {
     return panels.find((p) => p.id === activePanelId) || null;
